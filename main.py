@@ -22,7 +22,7 @@ async def deobf(ctx):
     try:
         # C# Projesini tetikle (Projende .csproj adını kontrol et!)
         res = subprocess.run(
-            ["dotnet", "run", "--project", "MoonsecDeobfuscator.csproj", secret, "-dis", "-i", "input.lua", "-o", "output.lua"],
+            ["dotnet", "run", "--project", "Moonsec.csproj", secret, "-dis", "-i", "input.lua", "-o", "output.lua"],
             capture_output=True, text=True
         )
 
