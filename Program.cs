@@ -9,31 +9,67 @@ namespace MoonsecDeobfuscator
     {
         static void Main(string[] args)
         {
-            if (args.Length != 5 || args[1] != "-i" || args[3] != "-o")
+            // 1. GÜVENLİK KONTROLÜ (Secrets'tan AUTH_KEY'i çeker)
+            string botSecret = Environment.GetEnvironmentVariable("AUTH_KEY");
+
+            // Botun gönderdiği ilk argüman şifreyle eşleşmeli
+            if (args.Length == 0 || args[0] != botSecret)
             {
-                Console.WriteLine("Usage:");
-                Console.WriteLine("Devirtualize and dump bytecode to file:\n\t-dev -i <input> -o <output>");
-                Console.WriteLine("Devirtualize and dump clean Lua code to file:\n\t-dis -i <input> -o <output>");
+                Console.WriteLine("YETKİSİZ ERİŞİM! Bu araç sadece yetkili bot üzerinden çalışır.");
                 return;
             }
-            var command = args[0];
-            var input = args[2];
-            var output = args[4];
-            if (!File.Exists(input))
+
+            // 2. ARGÜMAN KONTROLÜ (Geri kalan 5 parametre: -dis/-dev -i <in> -o <out>)
+            // Bot subprocess ile şunu yollamalı: [secret, command, -i, inputPath, -o, outputPath]
+            if (args.Length != 6 || args[2] != "-i" || args[4] != "-o")
             {
-                Console.WriteLine("Invalid input path!");
+                Console.WriteLine("Hatalı kullanım! Bot komutu eksik gönderdi.");
                 return;
             }
-            if (command == "-dev")
+
+            var command = args[1]; // -dev veya -dis
+            var inputPath = args[3];
+            var outputPath = args[5];
+
+            if (!File.Exists(inputPath))
             {
-                var result = new Deobfuscator().Deobfuscate(File.ReadAllText(input));
-                using var stream = new FileStream(output, FileMode.Create, FileAccess.Write);
-                using var serializer = new Serializer(stream);
-                serializer.Serialize(result);
+                Console.WriteLine("Geçersiz giriş yolu!");
+                return;
             }
-            else if (command == "-dis")
+
+            try
             {
-                var result = new Deobfuscator().Deobfuscate(File.ReadAllText(input));
+                if (command == "-dev")
+                {
+                    var result = new Deobfuscator().Deobfuscate(File.ReadAllText(inputPath));
+                    using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+                    using var serializer = new Serializer(stream);
+                    serializer.Serialize(result);
+                    Console.WriteLine("Bytecode başarıyla çıkarıldı.");
+                }
+                else if (command == "-dis")
+                {
+                    var result = new Deobfuscator().Deobfuscate(File.ReadAllText(inputPath));
+                    var cleanCode = new OptimizedLuaGenerator(result).Generate();
+                    
+                    // Bot imzasını ekliyoruz
+                    string finalResult = "-- [[ Deobfuscated by Moonsec-B3 Bot ]]\n" + cleanCode;
+                    
+                    File.WriteAllText(outputPath, finalResult);
+                    Console.WriteLine(finalResult); // Python'un okuması için konsola bas
+                }
+                else
+                {
+                    Console.WriteLine("Geçersiz komut!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("İşlem sırasında bir hata patladı: " + ex.Message);
+            }
+        }
+    }
+}
                 var cleanCode = new OptimizedLuaGenerator(result).Generate();
                 File.WriteAllText(output, cleanCode);
             }
@@ -61,7 +97,7 @@ class Program {
         string inputLua = args[1];
         
         // --- BURADAN SONRASI SENİN DEOBF KODLARININ DEVAMI OLACAK ---
-        Console.WriteLine("-- [[ Deobfuscated by MyBot ]]");
+        Console.WriteLine("-- [[ Deobfuscated by epstein]]");
         // ... deobf mantığı ...
     }
 }
