@@ -44,3 +44,24 @@ namespace MoonsecDeobfuscator
         }
     }
 }
+using System;
+
+class Program {
+    static void Main(string[] args) {
+        // Replit Secrets'tan AUTH_KEY'i oku
+        string botSecret = Environment.GetEnvironmentVariable("AUTH_KEY");
+
+        // Kontrol: Şifre yoksa veya botun gönderdiği ilk argüman şifreyle eşleşmiyorsa kapat
+        if (args.Length == 0 || args[0] != botSecret) {
+            Console.WriteLine("YETKİSİZ ERİŞİM! Bu araç sadece yetkili bot üzerinden çalışır.");
+            return;
+        }
+
+        // Eğer şifre doğruysa, deobf edilecek kod 2. argümandadır
+        string inputLua = args[1];
+        
+        // --- BURADAN SONRASI SENİN DEOBF KODLARININ DEVAMI OLACAK ---
+        Console.WriteLine("-- [[ Deobfuscated by MyBot ]]");
+        // ... deobf mantığı ...
+    }
+}
