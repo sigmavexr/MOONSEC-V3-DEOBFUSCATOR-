@@ -4,4 +4,5 @@ this is enough food the output . it does not need any other code.
 the output will be luac,to decompile luac : search "luac decompiler"
 
 our discord server :
-https://discord.gg/69ms
+
+https://discord.gg/F8z2V82WNZ
